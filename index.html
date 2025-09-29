@@ -4,127 +4,56 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>思考法診断ツール</title>
+  <!-- React 17 -->
   <script crossorigin src="https://unpkg.com/react@17/umd/react.development.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+  <!-- Babel -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- ✅ v1.8.5 の UMD 版 Recharts を使用 -->
+  <!-- ✅ Recharts v1.8.5 (UMD) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/1.8.5/Recharts.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useRef } = React;
+    const { useState } = React;
     const { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } = Recharts;
 
-    const ThinkingStyleAssessment = () => {
-      const [currentQuestion, setCurrentQuestion] = useState(0);
-      const [answers, setAnswers] = useState({});
-      const [showResult, setShowResult] = useState(false);
-      const resultRef = useRef(null);
-
-      const questions = [
-        { id: 1, text: "複雑な問題に直面したとき、まず事実を整理してステップバイステップで考える", type: "logical", reverse: false },
-        { id: 2, text: "情報を鵜呑みにせず、常に「本当にそうか?」と疑問を持つ", type: "critical", reverse: false },
-        { id: 3, text: "既存の枠組みにとらわれず、突飛なアイデアを思いつくことが多い", type: "lateral", reverse: false },
-        { id: 4, text: "一つのテーマについて、とことん深く掘り下げて考えるのが好き", type: "vertical", reverse: false },
-        { id: 5, text: "物事を個別ではなく、全体の関係性や影響を考える", type: "system", reverse: false },
-        { id: 6, text: "ユーザーや相手の立場に立って、共感しながら考える", type: "design", reverse: false },
+    const App = () => {
+      const [show, setShow] = useState(false);
+      const data = [
+        { subject: "論理的思考", score: 80, fullMark: 100 },
+        { subject: "批判的思考", score: 65, fullMark: 100 },
+        { subject: "水平思考", score: 90, fullMark: 100 },
+        { subject: "垂直思考", score: 70, fullMark: 100 },
+        { subject: "システム思考", score: 60, fullMark: 100 },
+        { subject: "デザイン思考", score: 85, fullMark: 100 }
       ];
 
-      const thinkingStyles = {
-        logical: "論理的思考",
-        critical: "批判的思考",
-        lateral: "水平思考",
-        vertical: "垂直思考",
-        system: "システム思考",
-        design: "デザイン思考"
-      };
-
-      const handleAnswer = (value) => {
-        const newAnswers = { ...answers, [currentQuestion]: value };
-        setAnswers(newAnswers);
-        if (currentQuestion < questions.length - 1) {
-          setCurrentQuestion(currentQuestion + 1);
-        } else {
-          setShowResult(true);
-        }
-      };
-
-      const calculateScores = () => {
-        const scores = { logical: 0, critical: 0, lateral: 0, vertical: 0, system: 0, design: 0 };
-        questions.forEach((q, index) => {
-          if (answers[index] !== undefined) {
-            const actualScore = q.reverse ? (6 - answers[index]) : answers[index];
-            scores[q.type] += actualScore;
-          }
-        });
-        return Object.keys(scores).map(key => ({
-          subject: thinkingStyles[key],
-          score: scores[key],
-          fullMark: 30
-        }));
-      };
-
-      if (showResult) {
-        const chartData = calculateScores();
-        return (
-          <div className="p-6 bg-gray-50 min-h-screen">
-            <h1 className="text-2xl font-bold mb-4">診断結果</h1>
+      return (
+        <div className="p-6">
+          <h1 className="text-2xl font-bold mb-4">思考法診断ツール</h1>
+          {!show ? (
+            <button onClick={() => setShow(true)} className="px-4 py-2 bg-indigo-600 text-white rounded">
+              診断結果を見る
+            </button>
+          ) : (
             <ResponsiveContainer width="100%" height={400}>
-              <RadarChart data={chartData}>
+              <RadarChart data={data}>
                 <PolarGrid />
                 <PolarAngleAxis dataKey="subject" />
-                <PolarRadiusAxis />
-                <Radar name="あなたの思考" dataKey="score" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.6} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} />
+                <Radar dataKey="score" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.6} />
               </RadarChart>
             </ResponsiveContainer>
-            <button
-              onClick={() => { setCurrentQuestion(0); setAnswers({}); setShowResult(false); }}
-              className="mt-4 bg-indigo-600 text-white px-4 py-2 rounded"
-            >
-              もう一度診断する
-            </button>
-          </div>
-        );
-      }
-
-      const progress = ((currentQuestion + 1) / questions.length) * 100;
-
-      return (
-        <div className="p-6 bg-gray-50 min-h-screen">
-          <h1 className="text-2xl font-bold mb-4">思考法診断ツール</h1>
-          <div className="mb-4">
-            <p>質問 {currentQuestion + 1} / {questions.length}</p>
-            <div className="w-full bg-gray-200 rounded h-2">
-              <div className="bg-indigo-600 h-2 rounded" style={{ width: `${progress}%` }}></div>
-            </div>
-          </div>
-          <p className="mb-4">{questions[currentQuestion].text}</p>
-          <div className="space-y-2">
-            {[
-              { value: 5, label: "非常に当てはまる" },
-              { value: 4, label: "やや当てはまる" },
-              { value: 3, label: "どちらともいえない" },
-              { value: 2, label: "あまり当てはまらない" },
-              { value: 1, label: "全く当てはまらない" }
-            ].map(option => (
-              <button
-                key={option.value}
-                onClick={() => handleAnswer(option.value)}
-                className="w-full bg-white border rounded p-3 text-left hover:bg-indigo-50"
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
+          )}
         </div>
       );
     };
 
-    ReactDOM.render(<ThinkingStyleAssessment />, document.getElementById('root'));
+    ReactDOM.render(<App />, document.getElementById('root'));
   </script>
 </body>
 </html>
