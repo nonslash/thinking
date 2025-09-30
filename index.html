@@ -11,18 +11,16 @@
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
   <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- ✅ Recharts v1.8.5 (UMD版) -->
+  <!-- ✅ Recharts v1.8.5 (UMD) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/recharts/1.8.5/Recharts.min.js"></script>
 </head>
 <body>
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState } = React;
     const { RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar, ResponsiveContainer } = Recharts;
 
     const App = () => {
-      const [show, setShow] = useState(false);
       const data = [
         { subject: "論理的思考", score: 80, fullMark: 100 },
         { subject: "批判的思考", score: 65, fullMark: 100 },
@@ -35,20 +33,14 @@
       return (
         <div className="p-6">
           <h1 className="text-2xl font-bold mb-4">思考法診断ツール</h1>
-          {!show ? (
-            <button onClick={() => setShow(true)} className="px-4 py-2 bg-indigo-600 text-white rounded">
-              診断結果を見る
-            </button>
-          ) : (
-            <ResponsiveContainer width="100%" height={400}>
-              <RadarChart data={data}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="subject" />
-                <PolarRadiusAxis angle={30} domain={[0, 100]} />
-                <Radar dataKey="score" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.6} />
-              </RadarChart>
-            </ResponsiveContainer>
-          )}
+          <ResponsiveContainer width="100%" height={400}>
+            <RadarChart data={data}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="subject" />
+              <PolarRadiusAxis angle={30} domain={[0, 100]} />
+              <Radar dataKey="score" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.6} />
+            </RadarChart>
+          </ResponsiveContainer>
         </div>
       );
     };
